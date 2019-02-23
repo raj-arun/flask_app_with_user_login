@@ -1,3 +1,4 @@
+
 {% extends "layout.html" %}
 
 {% block content%}
@@ -6,14 +7,43 @@
 			{{ form.hidden_tag() }}
 			<fieldset class="form-group">
 				<legend>Opex Estimator Login</legend>
+
+				<!-- Email field and the corresponding validations-->
 				<div class="form-group">
 					{{ form.email.label(class="form-control-label") }}
-					{{ form.email(class="form-control form-control-lg") }}	
+
+					{%if form.email.errors%}
+						{{ form.email(class="form-control form-control-lg is-invalid")}}
+						<div class="invalid-feedback">
+							{% for error in form.email.errors %}
+								<span> {{ error 	}}</span>
+							{% endfor %}
+						</div>
+					{% else %}
+						{{ form.email(class="form-control form-control-lg") }}
+					{%endif%}
 				</div>
+
+				<!-- Password field and the corresponding validations-->
 				<div class="form-group">
 					{{ form.password.label(class="form-control-label") }}
-					{{ form.password(class="form-control form-control-lg") }}
+					{%if form.password.errors%}
+						{{ form.password(class="form-control form-control-lg is-invalid")}}
+						<div class="invalid-feedback">
+							{% for error in form.password.errors %}
+								<span> {{ error 	}}</span>
+							{% endfor %}
+						</div>
+					{% else %}
+						{{ form.password(class="form-control form-control-lg") }}
+					{%endif%}
 				</div>
+
+				<div class="form-group">
+					{{ form.remember(class="form-check-input ml-2") }}
+					{{ form.remember.label(class="form-check-label ml-5") }}
+				</div>
+
 			</fieldset>
 			<div class="form-group">
 				{{ form.submit(class="btn btn-outline-info")}}
@@ -22,7 +52,13 @@
 	</div>
 	<div class="border-top pt-3">
 		<small class="text-muted">
+			<a class="ml-2" href="#">Forgot Password?</a>
+		</small>
+	</div>
+	<div class="pt-3">
+		<small class="text-muted">
 			New user? <a class="ml-2" href="{{url_for('login')}}">Register</a>
 		</small>
 	</div>
-{% endblock %}confirm
+
+{% endblock %}
