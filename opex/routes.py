@@ -1,8 +1,8 @@
-from flask import render_template, url_for, flash, redirect
+from flask import render_template, url_for, flash, redirect, request
 from opex import app, db, bcrypt
 from opex.forms import RegistrationForm, LoginForm
 from opex.models import User, Post
-from flask_login import login_user, current_user, logout_user
+from flask_login import login_user, current_user, logout_user, login_required
 
 @app.route("/")
 @app.route("/home")
@@ -40,8 +40,9 @@ def login():
 		user = User.query.filter_by(email = form.email.data).first()
 		if user and bcrypt.check_password_hash(user.password,form.password.data):
 			login_user(user, remember=form.remember.data)
-			flash(f'Welcome {form.email.data}!','success')
-			return redirect(url_for('home'))
+			next_page = request.args.get('next')
+			#flash(f'Welcome {form.email.data}!','success')
+			return redirect(next_page) if next_page else redirect(url_for('home'))
 		else:
 			flash('Login Unsuccessful!!', 'danger')     
 	return render_template('login.html', title='Login', form=form) 
@@ -51,3 +52,8 @@ def login():
 def logout():
 	logout_user()
 	return redirect(url_for('home'))
+
+@app.route("/account")
+@login_required   #to access my account page, the user need to be logged in 
+def account():
+	return render_template('account.html', title='My Account') 
