@@ -1,4 +1,4 @@
-# flask app with user registration and login
+# Flask app with user registration and login
 A simple Flask App with user login , registration capabilities
 
   - Python 3.6
