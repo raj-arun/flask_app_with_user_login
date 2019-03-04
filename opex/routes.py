@@ -1,16 +1,22 @@
+import os
+import secrets
+from PIL import Image
 from flask import render_template, url_for, flash, redirect, request
 from opex import app, db, bcrypt
-from opex.forms import RegistrationForm, LoginForm
+from opex.forms import RegistrationForm, LoginForm, UpdateAccountForm, NewPostForm
 from opex.models import User, Post
 from flask_login import login_user, current_user, logout_user, login_required
 
+#home page
 @app.route("/")
 @app.route("/home")
 def home():
-    return render_template('home.html')
+	posts = Post.query.all()
+	return render_template('home.html', posts=posts)
     #return render_template('home.html', posts=v_posts)  # posts is the argument name that will be passed to the template
     # and v_posts is the acutal variable with the posts
 
+#about page
 @app.route("/about")
 def about():
     return render_template('about.html') 
@@ -30,7 +36,7 @@ def register():
 		return redirect(url_for('login'))
 	return render_template('register.html', title='Register',form=form)         
 
-
+# login route
 @app.route("/login", methods=['GET','POST'])
 def login():
 	if current_user.is_authenticated:
@@ -48,12 +54,55 @@ def login():
 	return render_template('login.html', title='Login', form=form) 
 
 
+# logout route
 @app.route("/logout")
 def logout():
 	logout_user()
 	return redirect(url_for('home'))
 
-@app.route("/account")
+# function to resize and save the profile picture
+def save_profile_picture(form_picture):
+	random_val = secrets.token_hex(8)
+	_, file_ext = os.path.splitext(form_picture.filename)
+	picture_name = random_val + file_ext
+	file_path = os.path.join(app.root_path, 'static/profile pics/', picture_name)
+
+	# resize the image before saving it
+	thumbnail_size = (125, 125)
+	i = Image.open(form_picture)
+	i.thumbnail(thumbnail_size)
+	i.save(file_path)
+	
+	return picture_name
+
+# My account route
+@app.route("/account", methods=['GET','POST'])
 @login_required   #to access my account page, the user need to be logged in 
 def account():
-	return render_template('account.html', title='My Account') 
+	form = UpdateAccountForm()
+	if form.validate_on_submit():
+		if form.picture.data:
+			picture_file = save_profile_picture(form.picture.data)
+			current_user.image_file = picture_file
+		current_user.username = form.username.data
+		current_user.email = form.email.data
+		db.session.commit()
+		flash('Your account has been updated.','success')
+		return (redirect(url_for('account')))
+	elif request.method == 'GET':
+		form.username.data = current_user.username
+		form.email.data = current_user.email
+	image_file = url_for('static', filename='profile pics/' + current_user.image_file)
+	return render_template('account.html', title='My Account', image_file=image_file, form=form) 
+
+@app.route("/post/new", methods=['GET','POST'])
+@login_required
+def new_post():
+	form = NewPostForm()
+	if form.validate_on_submit():
+		post = Post(title=form.title.data, content=form.content.data, author=current_user)
+		db.session.add(post)
+		db.session.commit()
+		flash('Your post has been created.','success')
+		return redirect(url_for('home'))
+	return render_template('create_post.html',title='New Post', form=form)
