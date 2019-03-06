@@ -23,5 +23,5 @@ I wanted to learn flask by creating a flask blog application. I am following the
   - Type "python run.py"
 
 ### Useful Links
-  - [Flask website]
-  - [Flask Tutorial by Corey Schafer on YouTube]
+  - [Flask website](http://flask.pocoo.org/)
+  - [Flask Tutorial by Corey Schafer on YouTube](https://www.youtube.com/watch?v=MwZwr5Tvyxo&list=PL-osiE80TeTs4UjLw5MM6OjgkjFeUxCYH)
